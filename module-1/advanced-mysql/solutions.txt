@@ -1,0 +1,93 @@
+CHALLENGE 1: 
+
+
+STEP 1: 
+
+SELECT
+t.title_id as "Title ID",
+au.au_id as "Author ID",
+(t.advance* t.royalty/100) as "Advance",
+(t.price *s.qty* t.royalty/100*tit.royaltyper/100) as "Royalty"
+FROM authors as au
+INNER JOIN titleauthor as tit ON au.au_id = tit.au_id 
+INNER JOIN titles as t ON tit.title_id= t.title_id
+INNER JOIN sales as s ON s.title_id = t.title_id
+
+
+STEP 2:
+
+SELECT 
+step1.[Title ID],
+step1.[Author ID],
+SUM (step1.[Royalty])
+FROM (SELECT
+t.title_id as "Title ID",
+au.au_id as "Author ID",
+(t.advance* t.royalty/100) as "Advance",
+(t.price *s.qty* t.royalty/100*tit.royaltyper/100) as "Royalty"
+FROM authors as au
+INNER JOIN titleauthor as tit ON au.au_id = tit.au_id 
+INNER JOIN titles as t ON tit.title_id= t.title_id
+INNER JOIN sales as s ON s.title_id = t.title_id ) as step1
+GROUP BY step1.[Author ID], step1.[Title ID]
+
+
+STEP3: 
+SELECT 
+step1.[Author ID],
+SUM (step1.[Royalty]+step1.[Advance]) as profits
+FROM (SELECT
+t.title_id as "Title ID",
+au.au_id as "Author ID",
+(t.advance* t.royalty/100) as "Advance",
+(t.price *s.qty* t.royalty/100*tit.royaltyper/100) as "Royalty"
+FROM authors as au
+INNER JOIN titleauthor as tit ON au.au_id = tit.au_id 
+INNER JOIN titles as t ON tit.title_id= t.title_id
+INNER JOIN sales as s ON s.title_id = t.title_id ) as step1
+GROUP BY step1.[Author ID], step1.[Title ID]
+
+CHALLENGE 2: 
+
+STEP 1:
+
+SELECT
+t.title_id as "Title ID",
+au.au_id as "Author ID",
+(t.advance* t.royalty/100) as "Advance",
+(t.price *s.qty* t.royalty/100*tit.royaltyper/100) as "Royalty"
+INTO #STEP1
+FROM authors as au
+INNER JOIN titleauthor as tit ON au.au_id = tit.au_id 
+INNER JOIN titles as t ON tit.title_id= t.title_id
+INNER JOIN sales as s ON s.title_id = t.title_id
+
+STEP 2:
+
+SELECT 
+STEP1.[Title ID] as "Title ID", 
+STEP1.[Author ID] as "Author ID",
+SUM (STEP1.[Royalty]) as "Royalty",
+STEP1.[Advance] as "Advance"
+INTO #STEP2
+FROM #STEP1
+GROUP BY STEP1.[Title ID], STEP1.[Author ID]
+
+STEP3: 
+
+SELECT TOP(3)
+STEP2.[Author ID],
+SUM (STEP2.[Royalty]+ STEP2.[Advance])AS "Profit"
+INTO #final_table
+FROM #STEP2
+GROUP BY STEP2.[Title ID], STEP2.[Author ID]
+
+CHALLENGE 3:
+
+SELECT
+STEP3.[Author ID],
+STEP3.[Profit]
+INTO #MOST_PROFITING_AUTHORS
+FROM #final_table
+GROUP BY STEP2.[Title ID], STEP2.[Author ID]
+
