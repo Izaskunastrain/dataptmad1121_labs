@@ -1,0 +1,26 @@
+Step 1: 
+
+SELECT
+t.title_id as "Title ID",
+au.au_id as "Author ID",
+(t.advance* t.royalty/100) as "Advance",
+(t.price *s.qty* t.royalty/100*tit.royaltyper/100) as "Royalty"
+FROM authors as au
+INNER JOIN titleauthor as tit ON au.au_id = tit.au_id 
+INNER JOIN titles as t ON tit.title_id= t.title_id
+INNER JOIN sales as s ON s.title_id = t.title_id
+GROUP BY "Author ID"
+
+Step 2: 
+
+SELECT
+t.title_id as "Title ID",
+au.au_id as "Author ID",
+SUM (t.price *s.qty* t.royalty/100*tit.royaltyper/100) as "Royalty"
+FROM authors as au
+INNER JOIN titleauthor as tit ON au.au_id = tit.au_id 
+INNER JOIN titles as t ON tit.title_id= t.title_id
+INNER JOIN sales as s ON s.title_id = t.title_id
+GROUP BY "Title ID" 
+
+Step 3: 
